@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html lang='ru'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
+    <title>HabitMaster Pro</title>
+    <link rel='stylesheet' href='{{ url_for('static', filename='style.css') }}'>
+    <script src='https://telegram.org/js/telegram-web-app.js'></script>
+</head>
+<body>
+    <nav class='sidebar'>
+        <div class='logo'>HabitMaster</div>
+        <ul class='nav-links'>
+            <li class='nav-item'><a href='{{ url_for('home') }}' class='nav-link {% if request.endpoint == 'home' %}active{% endif %}'><span class='nav-icon'></span><span>Главная</span></a></li>
+            <li class='nav-item'><a href='{{ url_for('library') }}' class='nav-link {% if request.endpoint == 'library' %}active{% endif %}'><span class='nav-icon'></span><span>Библиотека</span></a></li>
+            <li class='nav-item'><a href='{{ url_for('shop') }}' class='nav-link {% if request.endpoint == 'shop' %}active{% endif %}'><span class='nav-icon'></span><span>Магазин</span></a></li>
+            <li class='nav-item'><a href='{{ url_for('stats') }}' class='nav-link {% if request.endpoint == 'stats' %}active{% endif %}'><span class='nav-icon'></span><span>Статистика</span></a></li>
+            <li class='nav-item'><a href='{{ url_for('profile') }}' class='nav-link {% if request.endpoint == 'profile' %}active{% endif %}'><span class='nav-icon'></span><span>Профиль</span></a></li>
+        </ul>
+        
+        {% if current_user %}
+        <div class='user-mini-profile'>
+            {% if current_user.photo_url %}
+            <img src='{{ current_user.photo_url }}' alt='Avatar' class='mini-avatar'>
+            {% else %}
+            <div class='mini-avatar' style='background:#444;display:flex;align-items:center;justify-content:center;'>{{ current_user.first_name[0] }}</div>
+            {% endif %}
+            <div class='mini-info'>
+                <div class='mini-name'>{{ current_user.first_name }}</div>
+                <div class='mini-level'>Lvl {{ current_user.level }}</div>
+            </div>
+        </div>
+        {% endif %}
+    </nav>
+
+    <main class='main-content'>
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        
+        // Helper for API calls
+        async function postData(url, data = {}) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            return response.json();
+        }
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

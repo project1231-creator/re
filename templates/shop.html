@@ -1,0 +1,39 @@
+﻿{% extends 'base.html' %}
+{% block content %}
+<div class='header'>
+    <h1 class='page-title'>Магазин</h1>
+    <div style='font-size:20px;font-weight:bold;color:var(--accent);'> {{ user.balance }}</div>
+</div>
+
+<div class='grid-container'>
+    {% for item in items %}
+    <div class='card'>
+        <span class='card-icon'>{{ item.icon }}</span>
+        <div class='card-title'>{{ item.name }}</div>
+        <div class='card-desc'>{{ item.description }}</div>
+        <div style='font-weight:bold;margin-bottom:10px;color:var(--accent)'>{{ item.price }} монет</div>
+        
+        {% if item.purchased %}
+            <button class='btn' disabled style='background:#444;color:#888'>Куплено</button>
+        {% elif item.can_afford %}
+            <button class='btn' onclick='buyItem({{ item.id }}, this)'>Купить</button>
+        {% else %}
+            <button class='btn' disabled style='background:#444;color:#888'>Не хватает</button>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+async function buyItem(id, btn) {
+    if(!confirm('Купить этот предмет?')) return;
+    const res = await postData('/api/buy/' + id);
+    if(res.success) {
+        alert(res.message);
+        location.reload();
+    } else {
+        alert('Ошибка: ' + res.message);
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,45 @@
+﻿{% extends 'base.html' %}
+{% block content %}
+<div class='header'>
+    <h1 class='page-title'>Главная</h1>
+    <div style='font-size:20px;font-weight:bold;color:var(--accent);'> {{ data.user.balance }}</div>
+</div>
+
+<div class='stats-overview'>
+    <div class='stat-box'>
+        <span class='stat-value'>{{ data.user.level }}</span>
+        <span class='stat-label'>Уровень</span>
+    </div>
+    <div class='stat-box'>
+        <span class='stat-value'>{{ data.user.xp }}</span>
+        <span class='stat-label'>XP</span>
+    </div>
+    <div class='stat-box'>
+        <span class='stat-value'>{{ data.user.streak }}</span>
+        <span class='stat-label'>Серия (дни)</span>
+    </div>
+    <div class='stat-box'>
+        <span class='stat-value'>{{ data.user.completed_count }}</span>
+        <span class='stat-label'>Выполнено</span>
+    </div>
+</div>
+
+<h2 style='margin-bottom:20px;'>Быстрый доступ</h2>
+<div class='grid-container'>
+    <div class='card' onclick='window.location.href="library"' style='cursor:pointer'>
+        <span class='card-icon'></span>
+        <div class='card-title'>Библиотека</div>
+        <div class='card-desc'>Читай и развивайся</div>
+    </div>
+    <div class='card' onclick='window.location.href="shop"' style='cursor:pointer'>
+        <span class='card-icon'></span>
+        <div class='card-title'>Магазин</div>
+        <div class='card-desc'>Трать монеты с умом</div>
+    </div>
+    <div class='card' onclick='window.location.href="stats"' style='cursor:pointer'>
+        <span class='card-icon'></span>
+        <div class='card-title'>Рейтинг</div>
+        <div class='card-desc'>Сравни себя с другими</div>
+    </div>
+</div>
+{% endblock %}

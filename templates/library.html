@@ -1,0 +1,40 @@
+﻿{% extends 'base.html' %}
+{% block content %}
+<div class='header'>
+    <h1 class='page-title'>Библиотека</h1>
+    <div style='color:var(--text-secondary)'>Прочитано: {{ read_count }}</div>
+</div>
+
+{% for cat, articles in categories.items() %}
+<h3 style='margin:20px 0 10px;color:var(--accent);'>{{ cat }}</h3>
+<div class='grid-container'>
+    {% for article in articles %}
+    <div class='card'>
+        <span class='card-icon'></span>
+        <div class='card-title'>{{ article.title }}</div>
+        <div class='card-desc'>{{ article.content }}</div>
+        <div style='font-size:12px;color:#888;margin-bottom:10px;'> {{ article.read_time }}</div>
+        {% if article.is_read %}
+            <button class='btn' disabled style='background:#444;color:#888'> Прочитано</button>
+        {% else %}
+            <button class='btn' onclick='markRead({{ article.id }}, this)'>Прочитать (+10 XP)</button>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}
+
+<script>
+async function markRead(id, btn) {
+    const res = await postData('/api/read/' + id);
+    if(res.success) {
+        btn.disabled = true;
+        btn.innerText = ' Прочитано';
+        btn.style.background = '#444';
+        btn.style.color = '#888';
+        alert('Статья прочитана! +10 XP');
+        location.reload(); // Обновить баланс/XP
+    }
+}
+</script>
+{% endblock %}

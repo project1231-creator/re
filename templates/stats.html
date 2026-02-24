@@ -1,0 +1,51 @@
+﻿{% extends 'base.html' %}
+{% block content %}
+<div class='header'>
+    <h1 class='page-title'>Статистика и Рейтинг</h1>
+</div>
+
+<div class='card' style='margin-bottom:30px;'>
+    <h3 style='margin-bottom:15px;'>Твои показатели</h3>
+    <div style='display:grid;grid-template-columns:repeat(2,1fr);gap:15px;'>
+        <div>Уровень: <strong style='color:var(--accent)'>{{ data.user.level }}</strong></div>
+        <div>XP: <strong>{{ data.user.xp }}</strong></div>
+        <div>Баланс: <strong style='color:var(--accent)'>{{ data.user.balance }}</strong></div>
+        <div>Серия: <strong>{{ data.user.streak }} дн.</strong></div>
+    </div>
+</div>
+
+<h3 style='margin-bottom:15px;'> Топ игроков</h3>
+<table class='leaderboard-table'>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Игрок</th>
+            <th>Уровень</th>
+            <th>XP</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for player in leaderboard %}
+        <tr>
+            <td class='rank-{{ loop.index }}'>{{ loop.index }}</td>
+            <td style='display:flex;align-items:center;gap:10px;'>
+                {% if player.photo_url %}
+                <img src='{{ player.photo_url }}' style='width:30px;height:30px;border-radius:50%'>
+                {% endif %}
+                {{ player.first_name }} {% if player.username %}(@{{ player.username }}){% endif %}
+            </td>
+            <td>{{ player.level }}</td>
+            <td>{{ player.xp }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div style='margin-top:30px;'>
+    <h3>Поиск игрока</h3>
+    <form action='/search' method='GET' class='search-container'>
+        <input type='text' name='q' class='search-input' placeholder='Введите ID пользователя (Telegram ID)'>
+        <button type='submit' class='btn' style='width:auto'>Найти</button>
+    </form>
+</div>
+{% endblock %}
