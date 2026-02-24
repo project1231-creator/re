@@ -8,8 +8,8 @@ from functools import wraps
 from datetime import datetime
 
 app = Flask(__name__)
-# Секретный ключ для сессий (меняй на случайную строку в продакшене)
-app.secret_key = "habitmaster-secret-key-2026-change-me"
+# Секретный ключ для сессий (можно любой набор символов)
+app.secret_key = "habitmaster-super-secret-key-change-in-prod"
 
 # Токен твоего бота
 BOT_TOKEN = "8534219584:AAHW2T8MTmoR3dJN_bQDtru49lUSx401QqA"
@@ -21,33 +21,29 @@ def check_telegram_authorization(init_data: str) -> dict:
     
     try:
         parsed_data = urllib.parse.parse_qs(init_data)
-        
-        # Получаем хеш
         hash_value = parsed_data.get('hash', [''])[0]
         
-        # Формируем строку для проверки (ключ=значение, отсортированные)
+        # Формируем строку данных для проверки (ключ=значение, отсортированные)
         data_check_list = []
         for key in sorted(parsed_data.keys()):
             if key != 'hash':
                 data_check_list.append(f"{key}={parsed_data[key][0]}")
         data_check_string = '\n'.join(data_check_list)
         
-        # Создаем секретный ключ из токена бота
+        # Создаем секретный ключ из токена бота (HMAC-SHA256)
         secret_key = hashlib.sha256(BOT_TOKEN.encode()).digest()
         
-        # Вычисляем HMAC-SHA256
+        # Вычисляем хеш
         hmac_hash = hmac.new(
             secret_key,
             data_check_string.encode(),
             hashlib.sha256
         ).hexdigest()
         
-        # Сравниваем
+        # Сравниваем хеши
         if hmac_hash == hash_value:
-            # Парсим данные пользователя
             user_data_str = parsed_data.get('user', ['{}'])[0]
-            user_data = json.loads(user_data_str)
-            return user_data
+            return json.loads(user_data_str)
             
         return None
     except Exception as e:
@@ -66,37 +62,42 @@ def login_required(f):
 def index():
     init_data = request.args.get('tgWebAppData', '')
     
-    # 1. Попытка реальной авторизации
+    # 1. Пытаемся авторизовать через Telegram
     tg_user = check_telegram_authorization(init_data)
     
     if tg_user:
-        # Успешная авторизация через Telegram
+        # Успех! Сохраняем данные в сессию
         session['user_id'] = str(tg_user['id'])
         session['user_name'] = tg_user.get('first_name', 'User')
         session['username'] = tg_user.get('username', '')
         session['photo_url'] = tg_user.get('photo_url', '')
         return redirect(url_for('home'))
     
-    # 2. РЕЖИМ РАЗРАБОТЧИКА (Для локального теста без HTTPS)
-    # Если ты запускаешь локально (localhost или 127.0.0.1), пускаем тестового юзера
+    # 2. РЕЖИМ РАЗРАБОТЧИКА (LOCALHOST)
+    # Если ты запускаешь локально (без HTTPS), Telegram не передаст данные корректно.
+    # Этот блок позволяет тебе зайти как "Тестовый пользователь" просто открыв сайт в браузере.
     host = request.host.split(':')[0]
     if host in ['127.0.0.1', 'localhost']:
-        print("⚠️ LOCALHOST MODE: Using fake user for testing")
-        session['user_id'] = '999999' # Тестовый ID
-        session['user_name'] = 'Тестовый Пользователь'
-        session['username'] = 'tester_felix'
+        print("⚠️ LOCALHOST MODE: Авторизация пропущена для тестов.")
+        session['user_id'] = '999999' 
+        session['user_name'] = 'Феликс (Тест)'
+        session['username'] = 'felix_dev'
         session['photo_url'] = ''
         return redirect(url_for('home'))
 
-    # 3. Если не localhost и проверка не прошла — ошибка
-    return render_template('index.html', error="Authorization failed. Make sure you open via Telegram Bot on HTTPS.")
+    # 3. Если это не localhost и проверка не прошла — показываем ошибку
+    return render_template('index.html', error="Authorization failed. Открой приложение через бота в Telegram (нужен HTTPS).")
 
 @app.context_processor
 def utility_processor():
     def format_date(date_str):
         if not date_str: return ''
         try:
-            dt = datetime.fromisoformat(date_str)
+            # Попытка парсинга разных форматов
+            if 'T' in date_str:
+                dt = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+            else:
+                dt = datetime.strptime(date_str, '%Y-%m-%d')
             return dt.strftime('%d.%m.%Y')
         except:
             return date_str
@@ -109,7 +110,7 @@ def utility_processor():
 
     return dict(format_date=format_date, format_number=format_number)
 
-# --- ВРЕМЕННЫЕ ДАННЫЕ (МОКИ) ---
+# --- МОКОВЫЕ ДАННЫЕ (Временные, пока нет БД) ---
 def get_user_stats(user_id):
     return {
         'user': {
@@ -127,10 +128,6 @@ def get_user_stats(user_id):
             'active_goals': 3,
             'completed_goals': 2,
             'achievements': 5,
-            'category_stats': [
-                {'category': 'Чтение', 'count': 45},
-                {'category': 'Спорт', 'count': 38},
-            ]
         }
     }
 
@@ -216,5 +213,5 @@ def logout():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    # debug=True позволяет видеть ошибки в консоли
+    # Запуск на всех интерфейсах, порт 5000
     app.run(host='0.0.0.0', port=5000, debug=True)
