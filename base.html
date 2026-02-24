@@ -3,35 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HabitMaster Pro - {% block title %}{% endblock %}</title>
-    <!-- Подключаем стили -->
+    <title>HabitMaster Pro</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!-- Подключаем Telegram Web App -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        // Инициализация Telegram
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand(); // Раскрыть на весь экран
-        
-        // Настраиваем цвета под тему телеграма (опционально)
-        document.documentElement.style.setProperty('--bg-primary', tg.themeParams.bg_color || '#1a1a1a');
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
     </script>
 </head>
 <body>
-    
-    <!-- Верхняя шапка (опционально) -->
-    <div class="header" style="padding: 10px 16px; display: flex; justify-content: space-between; align-items: center;">
-        <div style="font-weight: bold; font-size: 18px;">HabitMaster</div>
-        <div style="font-size: 12px; color: #aaa;">{{ session.get('user_name', 'Гость') }}</div>
-    </div>
-
-    <!-- Основной контент -->
     <div class="container">
         {% block content %}{% endblock %}
     </div>
 
-    <!-- Нижняя навигация -->
     {% if session.user_id %}
     <nav class="nav-bar">
         <a href="{{ url_for('home') }}" class="nav-item {{ 'active' if request.endpoint == 'home' else '' }}">
@@ -56,6 +40,5 @@
         </a>
     </nav>
     {% endif %}
-
 </body>
 </html>
